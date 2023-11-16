@@ -1,0 +1,27 @@
+import re
+
+responses = {
+    r'hello|hi|hey': 'Hello! How can I help you?',
+    r'how are you|how are you doing': 'I am just a computer program, so I don\'t have feelings, but thanks for asking!',
+    r'what is your name|who are you': 'I am a simple chatbot. You can call me ChatGPT.',
+    r'bye|goodbye': 'Goodbye! If you have more questions in the future, feel free to ask.',
+    r'help|what can you do': 'I can answer your questions and have simple conversations. Just type your question or say hello to get started.',
+    r'.*': 'Im not sure I understand. Can you please rephrase your question or ask something else?',
+}
+
+
+def chatbot_response(user_input):
+    for pattern, response in responses.items():
+        if re.match(pattern, user_input, re.IGNORECASE):
+            return response
+
+    return "I don't know how to respond to that."
+
+
+while True:
+    user_input = input("You: ")
+    if user_input.lower() == 'exit':
+        print("Chatbot: Goodbye!")
+        break
+    response = chatbot_response(user_input)
+    print("Chatbot:", response)
