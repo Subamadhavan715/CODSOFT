@@ -1,0 +1,40 @@
+import torch
+import torch.nn as nn
+import torchvision.models as models
+import torchvision.transforms as transforms
+from torch.autograd import Variable
+from nltk.tokenize import word_tokenize
+from collections import Counter
+
+# Sample dataset
+image_paths = ["image1.jpg", "image2.jpg", "image3.jpg"]
+captions = ["A cat sitting on a table", "A dog running in a park", "A beautiful sunset over the mountains"]
+
+class EncoderCNN(nn.Module):
+    def __init__(self):
+        super(EncoderCNN, self).__init__()
+        resnet = models.resnet50(pretrained=True)
+        modules = list(resnet.children())[:-1]
+        self.resnet = nn.Sequential(*modules)
+        self.fc = nn.Linear(resnet.fc.in_features, embed_size)
+
+    def forward(self, images):
+        features = self.resnet(images)
+        features = features.view(features.size(0), -1)
+        features = self.fc(features)
+        return features
+
+# Define a caption decoder using an LSTM
+class DecoderRNN(nn.Module):
+    def __init__(self, embed_size, hidden_size, vocab_size, num_layers):
+        super(DecoderRNN, self).__init__()
+        self.embed = nn.Embedding(vocab_size, embed_size)
+        self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_size, vocab_size)
+
+    def forward(self, features, captions, lengths):
+        embeddings = self.embed(captions)
+        embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
+        hiddens, _ = self.lstm(embeddings)
+        outputs = self.fc(hiddens)
+        return outputs
